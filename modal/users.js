@@ -15,8 +15,9 @@ db.once('open', function () {
 })
 
 const usersSchema = new Schema({
-    name: { type: String },
-    age: { type: Number }
+    __v: { type: Number, select: false },
+    name: { type: String, required: true },
+    password: { type: String, required: true, select: false }
 })
 
 module.exports = model('user', usersSchema)
