@@ -1,5 +1,7 @@
 const Koa = require('koa')
-const bodyParser = require('koa-bodyparser')
+const path = require('path')
+const koaStatic = require('koa-static')
+const koaBody = require('koa-body')
 const error = require('koa-json-error')
 const parameter = require('koa-parameter');
 const registered = require('./routes')
@@ -12,10 +14,19 @@ const app = new Koa()
 //     }
 // }
 
+// 启动静态服务器
+app.use(koaStatic(path.join(__dirname, 'public')))
+
 // 错误处理
 app.use(error())
 // 解析body
-app.use(bodyParser())
+app.use(koaBody({
+    multipart: true, //允许文件格式
+    formidable: {
+        uploadDir: path.join(__dirname, '/public/uploads'),  //上传文件输出目录 
+        keepExtensions: true //保留原始文件名
+    }
+}))
 // 校验参数
 app.use(parameter(app))
 // 注册路由
