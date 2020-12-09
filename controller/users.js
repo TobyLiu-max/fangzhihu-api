@@ -9,7 +9,9 @@ class UsersCtr {
     async findById(ctx) {
         const id = ctx.params.id
         try {
-            const user = await Users.findById(id)
+            const { fields = '' } = ctx.query;
+            const selectFields = fields.split(';').filter(f => f).map(f => ' +' + f).join('');
+            const user = await Users.findById(id).select(selectFields)
             ctx.body = user
         } catch (error) {
             ctx.throw(404, '用户不存在')
@@ -51,7 +53,14 @@ class UsersCtr {
     async update(ctx) {
         ctx.verifyParams({
             name: { type: 'string', required: false },
-            password: { type: 'string', required: false }
+            password: { type: 'string', required: false },
+            avatar_url: { type: 'string', required: false },
+            gender: { type: 'string', required: false },
+            headline: { type: 'string', required: false },
+            locations: { type: 'array', itemType: 'string', required: false },
+            business: { type: 'string', required: false },
+            employments: { type: 'array', itemType: 'object', required: false },
+            educations: { type: 'array', itemType: 'object', required: false },
         });
         const id = ctx.params.id
         const body = ctx.request.body
