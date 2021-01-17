@@ -1,7 +1,7 @@
 const jsonwebtoken = require('jsonwebtoken')
-const Topic = require('../modal/topics')
+const Topic = require('../model/topics')
+const Users = require('../model/users')
 const { secret } = require('../config')
-
 class TopicsCtr {
   async find(ctx) {
     // ctx.body = await Topic.find()
@@ -16,6 +16,20 @@ class TopicsCtr {
       .limit(perPage)
       .skip(page * perPage)
   }
+
+  //   检查是否关注
+  async checkTopicExist(ctx, next) {
+    try {
+      const user = await Topic.findById(ctx.params.id)
+      if (!user) {
+        ctx.throw(404, '用户不存在')
+      }
+    } catch (error) {
+      ctx.throw(404, '用户不存在')
+    }
+    await next()
+  }
+
   async findById(ctx) {
     const { fields = '' } = ctx.query
     const selectFields = fields
@@ -47,6 +61,12 @@ class TopicsCtr {
     })
     const topic = await Topic.findByIdAndUpdate(ctx.params.id, ctx.request.body)
     ctx.body = topic
+  }
+
+  //  获取话题列表
+  async listTopicFollowers(ctx) {
+    const users = await Users.find({ followingTopics: ctx.params.id })
+    ctx.body = users
   }
 }
 

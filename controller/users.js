@@ -1,5 +1,5 @@
 const jsonwebtoken = require('jsonwebtoken')
-const Users = require('../modal/users')
+const Users = require('../model/users')
 const { secret } = require('../config')
 
 class UsersCtr {
@@ -181,6 +181,58 @@ class UsersCtr {
   async listFollowers(ctx) {
     const users = await Users.find({ following: ctx.params.id })
     ctx.body = users
+  }
+
+  //关注话题
+  async followTopic(ctx) {
+    const me = await Users.findById(ctx.state.user._id).select(
+      'followingTopics'
+    )
+    // 如果没有被关注就可以关注，已经关注了就不能在关注
+    if (
+      !me.followingTopics.map((id) => id.toString()).includes(ctx.params.id)
+    ) {
+      me.followingTopics.push(ctx.params.id)
+      me.save()
+      ctx.body = {
+        code: 200,
+        message: '关注话题成功'
+      }
+    } else {
+      ctx.throw(409, '用户已关注')
+    }
+  }
+
+  // 取消关注话题
+  async unfollowTopic(ctx) {
+    const me = await Users.findById(ctx.state.user._id).select(
+      'followingTopics'
+    )
+    // 如果没有被关注就可以关注，已经关注了就不能在关注
+    const index = me.followingTopics
+      .map((id) => id.toString())
+      .indexOf(ctx.params.id)
+    if (index > -1) {
+      me.followingTopics.splice(index, 1)
+      me.save()
+      ctx.body = {
+        code: 200,
+        message: '取消关注话题成功'
+      }
+    } else {
+      ctx.throw(404, '用户不存在 ')
+    }
+  }
+
+  //  获取话题列表
+  async listFollowingTopics(ctx) {
+    const user = await Users.findById(ctx.params.id)
+      .select('followingTopics')
+      .populate('followingTopics')
+    if (!user) {
+      ctx.throw(404, '用户不存在')
+    }
+    ctx.body = user.followingTopics
   }
 }
 
