@@ -5,7 +5,7 @@ const { secret } = require('../config')
 class UsersCtr {
   async find(ctx) {
     // ctx.body = await Users.find()
-    const { pre_page = 2 } = ctx.query
+    const { pre_page = 10 } = ctx.query
     const page = Math.max(ctx.query.page * 1, 1) - 1
     const perPage = Math.max(pre_page * 1, 1)
     ctx.body = await Users.find()
@@ -21,7 +21,22 @@ class UsersCtr {
         .filter((f) => f)
         .map((f) => ' +' + f)
         .join('')
-      const user = await Users.findById(id).select(selectFields)
+      const populateStr = fields
+        .split(';')
+        .filter((f) => f)
+        .map((f) => {
+          if (f === 'employments') {
+            return 'employments.company employments.job'
+          }
+          if (f === 'educations') {
+            return 'educations.school educations.major'
+          }
+          return f
+        })
+        .join('')
+      const user = await await Users.findById(id)
+        .select(selectFields)
+        .populate(populateStr)
       ctx.body = user
     } catch (error) {
       ctx.throw(404, '用户不存在')
@@ -54,6 +69,8 @@ class UsersCtr {
 
   async checkOwner(ctx, next) {
     // 检查是不是当前用户
+    // console.log('ctx.params.id', ctx.params.id)
+    // console.log('ctx.state.user._id', ctx.state.user._id)
     if (ctx.params.id !== ctx.state.user._id) {
       ctx.throw(403, '没有权限')
     }
@@ -74,13 +91,11 @@ class UsersCtr {
     })
     const id = ctx.params.id
     const body = ctx.request.body
-    console.log('body', body)
-    try {
-      const user = await Users.findByIdAndUpdate(id, body)
-      ctx.body = user
-    } catch (error) {
+    const user = await Users.findByIdAndUpdate(ctx.params.id, ctx.request.body)
+    if (!user) {
       ctx.throw(404, '用户不存在')
     }
+    ctx.body = user
   }
 
   async login(ctx) {

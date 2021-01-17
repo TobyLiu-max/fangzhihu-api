@@ -29,8 +29,10 @@ const usersSchema = new Schema({
     required: true
   },
   headline: { type: String },
-  locations: { type: [{ type: String }], select: false },
-  // locations: { type: [{ type: Schema.Types.ObjectId, ref: 'Topic' }], select: false },
+  locations: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
+    select: false
+  },
   business: { type: Schema.Types.ObjectId, ref: 'Topic', select: false },
   employments: {
     type: [
