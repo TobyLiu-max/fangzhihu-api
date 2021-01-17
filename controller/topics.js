@@ -11,7 +11,8 @@ class TopicsCtr {
     const { pre_page = 2 } = ctx.query
     const page = Math.max(ctx.query.page * 1, 1) - 1
     const perPage = Math.max(pre_page * 1, 1)
-    ctx.body = await Topic.find()
+    // 添加模糊搜索，mongodb 会自动去匹配q参数
+    ctx.body = await Topic.find({ name: new RegExp(ctx.query.q) })
       .limit(perPage)
       .skip(page * perPage)
   }
