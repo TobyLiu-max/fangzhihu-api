@@ -1,5 +1,6 @@
 const jsonwebtoken = require('jsonwebtoken')
 const Users = require('../model/users')
+const Question = require('../model/questions')
 const { secret } = require('../config')
 
 class UsersCtr {
@@ -233,6 +234,12 @@ class UsersCtr {
       ctx.throw(404, '用户不存在')
     }
     ctx.body = user.followingTopics
+  }
+
+  //问题列表
+  async listQuestions(ctx) {
+    const question = await Question.find({ questioner: ctx.params.id })
+    ctx.body = question
   }
 }
 

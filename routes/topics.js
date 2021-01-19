@@ -15,9 +15,9 @@ const auth = jwt({ secret })
 
 router.get('/', find)
 
-router.get('/:id', findById)
+router.get('/:id', checkTopicExist, findById)
 
-router.post('/', auth, checkTopicExist, create)
+router.post('/', auth, create)
 
 router.patch('/:id', auth, checkTopicExist, update)
 

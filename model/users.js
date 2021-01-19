@@ -56,7 +56,7 @@ const usersSchema = new Schema({
     select: false
   },
   following: {
-    type: [{ type: Schema.Types.ObjectId, ref: 'user' }],
+    type: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     select: false
   },
   followingTopics: {
@@ -65,4 +65,4 @@ const usersSchema = new Schema({
   }
 })
 
-module.exports = model('user', usersSchema)
+module.exports = model('User', usersSchema)
